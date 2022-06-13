@@ -9,7 +9,7 @@
                 <div class="card-header">{{ __('Login') }}</div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('login_local') }}">
+                    <form method="POST" action="{{ route('login') }}">
                         @csrf
 
                         <div class="row mb-3">
@@ -54,10 +54,10 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6 offset-md-4">
-                               <button type="submit" class="w-50 btn btn-primary" >
-                                  {{ __('Login') }}
-                                </button>
-                                <!-- <button type="submit" class="btn btn-primary w-50"  value="LOGIN"> -->
+{{--                                <button type="submit" class="w-50 btn btn-primary" >--}}
+{{--                                    {{ __('Login') }}--}}
+{{--                                </button>--}}
+                                <input class="btn btn-primary w-50" onclick="Login()" value="LOGIN">
 
                                 @if (Route::has('password.request'))
                                     <a class="btn btn-link" href="{{ route('password.request') }}">

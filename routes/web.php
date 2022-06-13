@@ -13,34 +13,44 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-//login gg
+/*
+|--------------------------------------------------------------------------
+| Web LOGIN
+|--------------------------------------------------------------------------
+|
+|
+*/
 Route::get('/google_login', [App\Http\Controllers\Auth\LoginController::class, 'redirectToProvider'])->name('google_login');
 Route::get('/google_login_callback', [App\Http\Controllers\Auth\LoginController::class, 'handleProviderCallback']);
 
-//get local
-Route::post('local/login', [App\Http\Controllers\UserController::class, 'login'])->name('login_local');
-Route::get('local/index', [App\Http\Controllers\UserController::class, 'index'])->name('user');
-Route::get('/user/{id}', [App\Http\Controllers\UserViewController::class, 'getImage'])->name('add_avatar');
-Route::post('/user/{id}', [App\Http\Controllers\UserViewController::class, 'postImage']);
+//Route::get('/user/{id}', [App\Http\Controllers\UserViewController::class, 'getImage'])->name('add_avatar');
+//Route::post('/user/{id}', [App\Http\Controllers\UserViewController::class, 'postImage']);
 
 //get server user
 //Route::get('/user', [App\Http\Controllers\UserViewController::class, 'index'])->name('user');
 //Route::post('/login', [App\Http\Controllers\UserViewController::class, 'postlogin'])->name('postlogin');
 
-Route::get('/user/create', [App\Http\Controllers\UserViewController::class, 'create'])->name('create');
+/*
+|--------------------------------------------------------------------------
+| Web POST
+|--------------------------------------------------------------------------
+|
+|
+*/
+Route::post('/login', [App\Http\Controllers\UserViewController::class, 'login_local'])->name('login_local');
 
-//Document routes
-Route::get('/document/view', [App\Http\Controllers\DocumentController::class, 'view']);
-Route::get('/document/index', [App\Http\Controllers\DocumentController::class, 'index'])->name("index");
+//get local
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [App\Http\Controllers\UserViewController::class, 'index_local'])->name('user');
+    Route::get('/category', [App\Http\Controllers\CategoryViewController::class, 'index']);
+    Route::get('/category/create', [App\Http\Controllers\CategoryViewController::class, 'create']);
+    Route::get('/category/camdoan', [App\Http\Controllers\CategoryViewController::class, 'camdoan']);
+    Route::get('/category/phieudieutri', [App\Http\Controllers\CategoryViewController::class, 'phieudieutri']);
+});
 
-Route::POST('/document/create', [App\Http\Controllers\DocumentController::class, 'create'])->name("createDocument");
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

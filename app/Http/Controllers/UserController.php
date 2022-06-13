@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Mongodb\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Route;
-use Session;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -37,8 +36,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        //dd(auth::user());
-        //dd(auth('sanctum')->check());
         $userId = auth::user();
 
         $user = User::where("api_token",$userId->api_token)->first();
@@ -78,15 +75,12 @@ class UserController extends Controller
                 'password' => $request->password
             ];
 
-            if (Auth::attempt($data)) {
+            if (auth()->attempt($data)) {
                 Auth::user()->generateAndSaveApiAuthToken();
 
                 $user = User::where('email', $request['email'] )->first();
-                auth()->login($user, true);
 
-                //dd(auth::user());
-                //return response()->json(['login success' => $user], 200);
-                return redirect()->to("/document/index");
+                return response()->json(['login success' => $user], 200);
             }
         }
     }
@@ -150,32 +144,27 @@ class UserController extends Controller
         return response()->json($arr);
     }
 
-    // Form thêm hình ảnh
-    public function getImage($id)
+    //get hình ảnh
+    public function getImage(Request $request)
     {
-        $userId = auth()->user()->id;
-        $user = User::find($id);
-        return view('user', compact('user'));
+        $image = auth()->user()->avatar_upload;
+        return response()->json(["message" => $image], 200);
     }
 
     // Xử lý thêm ảnh
-    public function postImage(Request $request, $id)
+    public function postImage(Request $request)
     {
-        $user = User::find($id);
-        if($request->hasFile('avatar_upload')){
+        $image = "data:image/jpeg;base64,".base64_encode(file_get_contents($request->file('avatar_upload')->path()));
 
-            $fImage = $request->file('avatar_upload');
-            $bientam = time().'_'.$fImage->getClientOriginalName();
-            $destinationPath = public_path('/upload');
-            $fImage->move($destinationPath,$bientam);
-            $user->avatar_upload = $bientam;
-        }
-        else{
-            $user->avatar_upload = $user->old_image;
-        }
+        if ($image)
+        {
+            $user = auth::user();
+            $user->update([
+                "avatar_upload" => $image,
+            ]);
 
-        $user->save();
-        return redirect('/user');
+            return response()->json(["message" => "Tải ảnh lên thành công", "data" => $image], 200);
+        }
     }
 
     /**
@@ -215,7 +204,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|regex:/(0)[0-9]{9}/|min:10',
+            'phone' => 'nullable|regex:/(0)[0-9]{9}/|min:10',
         ]);
 
         if ($validator->fails()) {
